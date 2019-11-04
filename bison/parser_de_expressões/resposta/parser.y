@@ -14,23 +14,23 @@
 %token EOL
 
 %%
-calc: /* nothing */                      
- | calc exp EOL { printf("= %d\n", $2); }
+exp: /* nothing */                      
+ | exp termo EOL { printf("= %d\n", $2); }
  ;
 
-exp: factor       
- | exp ADD factor { $$ = $1 + $3; }
- | exp SUB factor { $$ = $1 - $3; }
+termo: fator       
+ | termo ADD fator { $$ = $1 + $3; }
+ | termo SUB fator { $$ = $1 - $3; }
  ;
 
-factor: term 
- | factor MUL term { $$ = $1 * $3; }
- | factor DIV term { $$ = $1 / $3; }
+fator: const
+ | fator MUL const { $$ = $1 * $3; }
+ | fator DIV const { $$ = $1 / $3; }
  ;
 
-term: NUM 
- | EXPO term EXPC { $$ = $2; }
- | EXPO exp EXPC { $$ = $2; }
+const: NUM 
+ | EXPO termo EXPC { $$ = $2; }
+ | EXPO fator EXPC { $$ = $2; }
 ;
 %%
 

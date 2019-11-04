@@ -1,4 +1,12 @@
-notes
 *.swp
 .DS_STORE
+*.vim
+*yy.c
+a.out
 ~*
+gabarito
+*.x
+lex.yy.c
+parser.tab.c
+trabalho_solucao
+parser.tab.h
