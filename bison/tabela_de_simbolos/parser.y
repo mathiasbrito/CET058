@@ -16,10 +16,27 @@ typedef struct No {
 } No;
 
 
+enum tipos{INT, FLOAT, CHAR, STRING};
+
+typedef struct registro_da_tabela_de_simbolo {
+    char token[50];
+    char lexema[50];
+    int tipo;
+    int endereco;
+} RegistroTS;
+
+#define TAM_TABELA_DE_SIMBOLOS 1024
+RegistroTS tabela_de_simbolos[TAM_TABELA_DE_SIMBOLOS];
+int prox_posicao_livre = 0;
+int prox_mem_livre = 0;
+    
+
 No* allocar_no();
 void liberar_no(No* no);
 void imprimir_arvore(No* raiz);
 No* novo_no(char[50], No**, int);
+void imprimir_tabela_de_simbolos(RegistroTS*);
+void inserir_na_tabela_de_simbolos(RegistroTS);
 
 %}
 
@@ -38,6 +55,7 @@ No* novo_no(char[50], No**, int);
 %token APAR
 %token FPAR
 %token EOL
+%token ID
 
 %type<no> termo
 %type<no> fator
@@ -48,6 +66,7 @@ No* novo_no(char[50], No**, int);
 %type<simbolo> DIV
 %type<simbolo> SUB
 %type<simbolo> ADD
+%type<simbolo> ID
 
 
 %%
@@ -55,7 +74,8 @@ No* novo_no(char[50], No**, int);
 
 exp:
     | exp termo EOL       { 
-                            imprimir_arvore($2) 
+                            imprimir_arvore($2);printf("\n\n");
+                            imprimir_tabela_de_simbolos(tabela_de_simbolos);
                           }
 termo: fator               
    | termo ADD fator       { 
@@ -95,9 +115,17 @@ fator: const
                         }
      ;
 
-const: NUM { $$ = novo_no($1, NULL, 0); }               
-   
-
+const: NUM { $$ = novo_no($1, NULL, 0); }  
+    |  ID  { 
+             $$ = novo_no($1, NULL, 0);
+             RegistroTS registro;
+             strncpy(registro.token, "ID", 50);
+             strncpy(registro.lexema, $1, 50);
+             registro.tipo = INT;
+             registro.endereco = prox_mem_livre;
+             prox_mem_livre += 4;
+             inserir_na_tabela_de_simbolos(registro);
+           }
 %%
 
 /* Código C geral, será adicionado ao final do código fonte 
@@ -140,6 +168,26 @@ void imprimir_arvore(No* raiz) {
     }
 }
 
+void inserir_na_tabela_de_simbolos(RegistroTS registro) {
+    if (prox_posicao_livre == TAM_TABELA_DE_SIMBOLOS) {
+        printf("Erro! Tabela de Símbolos Cheia!");
+        return;
+    }
+    tabela_de_simbolos[prox_posicao_livre] = registro;
+    prox_posicao_livre++;
+}
+
+void imprimir_tabela_de_simbolos(RegistroTS *tabela_de_simbolos) {
+    printf("----------- Tabela de Símbolos ---------------\n");
+    for(int i = 0; i < prox_posicao_livre; i++) {
+        printf("{%s} -> {%s} -> {%d} -> {%x}\n", tabela_de_simbolos[i].token, \
+                                               tabela_de_simbolos[i].lexema, \
+                                               tabela_de_simbolos[i].tipo, \
+                                               tabela_de_simbolos[i].endereco);
+        printf("---------\n");
+    }
+    printf("----------------------------------------------\n");
+}
 
 int main(int argc, char** argv) {
     yyparse();

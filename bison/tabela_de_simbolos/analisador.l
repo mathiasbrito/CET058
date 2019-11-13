@@ -12,11 +12,13 @@
 
 /* Definições */
 NUMBER [0-9]+
+ID [a-zA-Z_][a-zA-Z_]*
 
 
 /* Início das Regras */
 %%
 {NUMBER}    {strncpy(yylval.simbolo, yytext, 50); return NUM;}
+{ID}        {strncpy(yylval.simbolo, yytext, 50); return ID;}
 "\*"        {return MUL;}
 "/"         {return DIV;}
 "\+"         {return ADD;}
